@@ -1,14 +1,22 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from models import ChatRequest
+from ai import generate_reply
 app = FastAPI(
     title="Sentinel AI",
     description="AI-Powered Cybersecurity Assistant",
     version="1.0.0"
 )
 
-class ChatRequest(BaseModel):
-    name: str
-    message: str
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 @app.get("/")
 def home():
@@ -46,19 +54,10 @@ def hello(name: str):
 @app.post("/chat")
 def chat(request: ChatRequest):
 
-    user_message = request.message.lower()
-
-    if "hello" in user_message:
-        reply = f"Hello {request.name}! Nice to meet you."
-
-    elif "scan" in user_message:
-        reply = "Website scanning is coming soon."
-
-    elif "help" in user_message:
-        reply = "I can help with cybersecurity questions."
-
-    else:
-        reply = "I'm still learning. Ask me something else."
+    reply = generate_reply(
+        request.name,
+        request.message
+    )
 
     return {
         "reply": reply
