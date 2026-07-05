@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from models import ChatRequest
 from services.scanner import scan_website
 from ai import generate_reply
+
 app = FastAPI(
     title="Sentinel AI",
     description="AI-Powered Cybersecurity Assistant",
@@ -16,7 +17,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 @app.get("/")
@@ -59,14 +59,52 @@ def chat(request: ChatRequest):
 
     if "scan" in user_message:
         url = user_message.replace("scan", "").strip()
-        result = scan_website(url)
 
-        reply = (
-            f"Website: {result['website']}\n"
-            f"Status: {result['status']}\n"
-            f"HTTPS: {result['https']}\n"
-            f"HTTP Code: {result['status_code']}"
-        )
+        result = scan_website(url)
+        print(result)
+
+        headers = result["security_headers"]
+
+        score = 100
+
+        if not headers["Strict-Transport-Security"]:
+            score -= 20
+
+        if not headers["Content-Security-Policy"]:
+            score -= 30
+
+        if not headers["X-Content-Type-Options"]:
+            score -= 20
+
+        if not headers["X-Frame-Options"]:
+            score -= 15
+
+        if score >= 80:
+            risk = "🟢 Low"
+        elif score >= 60:
+            risk = "🟡 Medium"
+        else:
+            risk = "🔴 High"
+
+        reply = f"""
+🛡️ Sentinel AI Security Report
+
+Website: {result['website']}
+
+Status: {result['status']}
+HTTPS: {result['https']}
+HTTP Code: {result['status_code']}
+
+Security Headers
+----------------
+Strict-Transport-Security: {'✅' if headers['Strict-Transport-Security'] else '❌'}
+Content-Security-Policy: {'✅' if headers['Content-Security-Policy'] else '❌'}
+X-Content-Type-Options: {'✅' if headers['X-Content-Type-Options'] else '❌'}
+X-Frame-Options: {'✅' if headers['X-Frame-Options'] else '❌'}
+
+Risk Score: {score}/100
+Overall Risk: {risk}
+"""
 
     else:
         reply = generate_reply(
@@ -77,4 +115,3 @@ def chat(request: ChatRequest):
     return {
         "reply": reply
     }
-
