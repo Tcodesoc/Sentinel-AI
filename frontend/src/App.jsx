@@ -2,20 +2,15 @@ import "./App.css";
 import { useState } from "react";
 
 function App() {
-
   const [message, setMessage] = useState("");
-  const [reply, setReply] = useState("AI response will appear here.");
+  const [reply, setReply] = useState("Run a security scan to begin.");
 
   const sendMessage = async () => {
-
     const response = await fetch("http://127.0.0.1:8000/chat", {
-
       method: "POST",
-
       headers: {
         "Content-Type": "application/json",
       },
-
       body: JSON.stringify({
         name: "Sharon",
         message: message,
@@ -23,7 +18,6 @@ function App() {
     });
 
     const data = await response.json();
-
     setReply(data.reply);
   };
 
@@ -32,21 +26,25 @@ function App() {
 
       <h1>🛡️ Sentinel AI</h1>
 
-      <p>Your AI Cybersecurity Assistant</p>
+      <p className="subtitle">
+        AI-Powered Cybersecurity Assistant
+      </p>
 
-      <input
-        type="text"
-        placeholder="Ask me something..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
+      <div className="searchBox">
+        <input
+          type="text"
+          placeholder="Example: scan openai.com"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
 
-      <button onClick={sendMessage}>
-        Send
-      </button>
+        <button onClick={sendMessage}>
+          Scan
+        </button>
+      </div>
 
-      <div className="response">
-        {reply}
+      <div className="report">
+        <pre>{reply}</pre>
       </div>
 
     </div>
