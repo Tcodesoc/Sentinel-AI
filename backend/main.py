@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from models import ChatRequest
+from services.scanner import scan_website
 from ai import generate_reply
 app = FastAPI(
     title="Sentinel AI",
@@ -54,11 +55,26 @@ def hello(name: str):
 @app.post("/chat")
 def chat(request: ChatRequest):
 
-    reply = generate_reply(
-        request.name,
-        request.message
-    )
+    user_message = request.message.lower()
+
+    if "scan" in user_message:
+        url = user_message.replace("scan", "").strip()
+        result = scan_website(url)
+
+        reply = (
+            f"Website: {result['website']}\n"
+            f"Status: {result['status']}\n"
+            f"HTTPS: {result['https']}\n"
+            f"HTTP Code: {result['status_code']}"
+        )
+
+    else:
+        reply = generate_reply(
+            request.name,
+            request.message
+        )
 
     return {
         "reply": reply
     }
+
