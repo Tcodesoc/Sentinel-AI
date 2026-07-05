@@ -58,12 +58,40 @@ def chat(request: ChatRequest):
     user_message = request.message.lower()
 
     if "scan" in user_message:
+
         url = user_message.replace("scan", "").strip()
 
         result = scan_website(url)
         print(result)
 
         headers = result["security_headers"]
+
+        recommendations = []
+
+        if not headers["Strict-Transport-Security"]:
+            recommendations.append(
+                "Enable Strict-Transport-Security to enforce HTTPS."
+            )
+
+        if not headers["Content-Security-Policy"]:
+            recommendations.append(
+                "Add a Content-Security-Policy header to reduce XSS risk."
+            )
+
+        if not headers["X-Content-Type-Options"]:
+            recommendations.append(
+                "Enable X-Content-Type-Options to prevent MIME sniffing."
+            )
+
+        if not headers["X-Frame-Options"]:
+            recommendations.append(
+                "Enable X-Frame-Options to help prevent clickjacking."
+            )
+
+        if len(recommendations) == 0:
+            recommendations.append(
+                "Excellent! No missing security headers were detected."
+            )
 
         score = 100
 
@@ -104,9 +132,14 @@ X-Frame-Options: {'✅' if headers['X-Frame-Options'] else '❌'}
 
 Risk Score: {score}/100
 Overall Risk: {risk}
+
+Recommendations
+---------------
+{chr(10).join(recommendations)}
 """
 
     else:
+
         reply = generate_reply(
             request.name,
             request.message
