@@ -129,6 +129,37 @@ function App() {
             ))}
           </ul>
           <hr />
+          <hr />
+
+<h3>🔐 SSL Certificate</h3>
+
+{scan.ssl?.valid ? (
+  <div>
+    <p>
+      ✅ Certificate Valid
+    </p>
+
+    <p>
+      Issuer: {scan.ssl.issuer}
+    </p>
+
+    <p>
+      TLS Version: {scan.ssl.tls_version}
+    </p>
+
+    <p>
+      Expires: {scan.ssl.expires}
+    </p>
+
+    <p>
+      Days Remaining: {scan.ssl.days_remaining} days
+    </p>
+  </div>
+) : (
+  <p>
+    ❌ SSL certificate information unavailable
+  </p>
+)}
 
 <h3>🤖 AI Security Analysis</h3>
 
