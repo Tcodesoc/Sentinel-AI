@@ -71,9 +71,9 @@ def build_scan_data(result):
 
         "explanations": explain_risk(result),
 
-        # SSL Intelligence
         "ssl": result.get("ssl"),
 
-        # Domain Intelligence
-        "domain": result.get("domain")
+"domain": result.get("domain"),
+
+"dns": result.get("dns")
     }

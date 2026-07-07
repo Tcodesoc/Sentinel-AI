@@ -207,6 +207,69 @@ function App() {
 
   </div>
 )}
+<hr />
+
+<h3>🌐 DNS Intelligence</h3>
+
+{scan.dns ? (
+  <div className="card">
+
+    <p>
+      <strong>A Records:</strong>
+    </p>
+
+    <ul>
+      {scan.dns.a_records?.map((record, index) => (
+        <li key={index}>
+          {record}
+        </li>
+      ))}
+    </ul>
+
+
+    <p>
+      <strong>MX Records:</strong>
+    </p>
+
+    <ul>
+      {scan.dns.mx_records?.map((record, index) => (
+        <li key={index}>
+          {record}
+        </li>
+      ))}
+    </ul>
+
+
+    <p>
+      <strong>SPF:</strong>{" "}
+      {scan.dns.spf ? "✅ Enabled" : "❌ Missing"}
+    </p>
+
+
+    <p>
+      <strong>DMARC:</strong>{" "}
+      {scan.dns.dmarc ? "✅ Enabled" : "❌ Missing"}
+    </p>
+
+
+    <p>
+      <strong>Nameservers:</strong>
+    </p>
+
+    <ul>
+      {scan.dns.ns_records?.map((ns, index) => (
+        <li key={index}>
+          {ns}
+        </li>
+      ))}
+    </ul>
+
+  </div>
+) : (
+  <p>
+    DNS information unavailable
+  </p>
+)}
 
 <h3>🤖 AI Security Analysis</h3>
 

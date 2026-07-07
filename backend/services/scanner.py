@@ -1,8 +1,10 @@
 import time
 import requests
 import re
+
 from services.ssl_checker import check_ssl
 from services.domain_checker import check_domain
+from services.dns_checker import check_dns
 
 
 def scan_website(url: str):
@@ -76,6 +78,7 @@ def scan_website(url: str):
             threat_score += 10
 
 
+
         # ----------------------------
         # SSL CHECK
         # ----------------------------
@@ -90,6 +93,7 @@ def scan_website(url: str):
                 "days_remaining": None,
                 "tls_version": None
             }
+
 
 
         # ----------------------------
@@ -108,6 +112,26 @@ def scan_website(url: str):
             }
 
 
+
+        # ----------------------------
+        # DNS CHECK
+        # ----------------------------
+        try:
+            dns_data = check_dns(url)
+
+        except Exception:
+            dns_data = {
+                "domain": url,
+                "a_records": [],
+                "mx_records": [],
+                "txt_records": [],
+                "ns_records": [],
+                "spf": False,
+                "dmarc": False
+            }
+
+
+
         return {
             "website": url,
             "status": "Online",
@@ -115,10 +139,16 @@ def scan_website(url: str):
             "status_code": response.status_code,
             "response_time": elapsed,
             "threat_score": threat_score,
+
             "security_headers": security_headers,
+
             "ssl": ssl_data,
-            "domain": domain_data
+
+            "domain": domain_data,
+
+            "dns": dns_data
         }
+
 
 
     except Exception:
@@ -152,5 +182,15 @@ def scan_website(url: str):
                 "created": None,
                 "domain_age": None,
                 "nameservers": []
+            },
+
+            "dns": {
+                "domain": None,
+                "a_records": [],
+                "mx_records": [],
+                "txt_records": [],
+                "ns_records": [],
+                "spf": False,
+                "dmarc": False
             }
         }
