@@ -1,34 +1,63 @@
+import time
 import requests
+import re
 
 
 def scan_website(url: str):
 
+    # Normalize URL
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "https://" + url
 
     try:
+        start = time.time()
         response = requests.get(url, timeout=5)
+        elapsed = round((time.time() - start) * 1000)
 
         headers = response.headers
+
+        # ----------------------------
+        # SECURITY HEADERS CHECK
+        # ----------------------------
+        security_headers = {
+            "Strict-Transport-Security": "Strict-Transport-Security" in headers,
+            "Content-Security-Policy": "Content-Security-Policy" in headers,
+            "X-Content-Type-Options": "X-Content-Type-Options" in headers,
+            "X-Frame-Options": "X-Frame-Options" in headers
+        }
+
+        # ----------------------------
+        # BASIC THREAT INTELLIGENCE
+        # ----------------------------
+        suspicious_keywords = [
+            "login", "verify", "bank", "secure",
+            "account", "update", "password"
+        ]
+
+        threat_score = 0
+
+        url_lower = url.lower()
+
+        for word in suspicious_keywords:
+            if word in url_lower:
+                threat_score += 5
+
+        # HTTP (not HTTPS) increases risk
+        if url.startswith("http://") and not url.startswith("https://"):
+            threat_score += 20
+
+        # Simple phishing signal: long numbers in URL
+        if re.search(r"\d{4,}", url):
+            threat_score += 10
 
         return {
             "website": url,
             "status": "Online",
             "https": url.startswith("https://"),
             "status_code": response.status_code,
-            "security_headers": {
-                "Strict-Transport-Security":
-                    "Strict-Transport-Security" in headers,
-
-                "Content-Security-Policy":
-                    "Content-Security-Policy" in headers,
-
-                "X-Content-Type-Options":
-                    "X-Content-Type-Options" in headers,
-
-                "X-Frame-Options":
-                    "X-Frame-Options" in headers
-            }
+            "response_time": elapsed,
+            "threat_score": threat_score,
+            "security_headers": security_headers
         }
 
     except Exception:
@@ -37,6 +66,8 @@ def scan_website(url: str):
             "status": "Offline",
             "https": False,
             "status_code": None,
+            "response_time": None,
+            "threat_score": 100,
             "security_headers": {
                 "Strict-Transport-Security": False,
                 "Content-Security-Policy": False,

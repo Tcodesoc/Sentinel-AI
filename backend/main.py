@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from services.ai_explainer import explain_risk
 from models import ChatRequest
 from services.scanner import scan_website
+from services.report import build_scan_data
 from ai import generate_reply
-from services.report import build_report
 
 app = FastAPI(
     title="Sentinel AI",
@@ -11,9 +12,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,25 +61,17 @@ def hello(name: str):
 @app.post("/chat")
 def chat(request: ChatRequest):
 
-    user_message = request.message.lower()
+    user_message = request.message.lower().strip()
 
-    if "scan" in user_message:
-
-        url = user_message.replace("scan", "").strip()
+    if user_message.startswith("scan"):
+        url = user_message.replace("scan", "").replace(":", "").strip()
 
         result = scan_website(url)
 
-        print(result)
-
-        reply = build_report(result)
-
-    else:
-
-        reply = generate_reply(
-            request.name,
-            request.message
-        )
+        return {
+            "reply": build_scan_data(result)
+        }
 
     return {
-        "reply": reply
+        "reply": generate_reply(request.name, request.message)
     }
