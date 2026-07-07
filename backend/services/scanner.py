@@ -1,6 +1,7 @@
 import time
 import requests
 import re
+from services.ssl_checker import check_ssl
 
 
 def scan_website(url: str):
@@ -11,27 +12,48 @@ def scan_website(url: str):
 
     try:
         start = time.time()
-        response = requests.get(url, timeout=5)
-        elapsed = round((time.time() - start) * 1000)
+
+        response = requests.get(
+            url,
+            timeout=5
+        )
+
+        elapsed = round(
+            (time.time() - start) * 1000
+        )
 
         headers = response.headers
+
 
         # ----------------------------
         # SECURITY HEADERS CHECK
         # ----------------------------
         security_headers = {
-            "Strict-Transport-Security": "Strict-Transport-Security" in headers,
-            "Content-Security-Policy": "Content-Security-Policy" in headers,
-            "X-Content-Type-Options": "X-Content-Type-Options" in headers,
-            "X-Frame-Options": "X-Frame-Options" in headers
+            "Strict-Transport-Security":
+                "Strict-Transport-Security" in headers,
+
+            "Content-Security-Policy":
+                "Content-Security-Policy" in headers,
+
+            "X-Content-Type-Options":
+                "X-Content-Type-Options" in headers,
+
+            "X-Frame-Options":
+                "X-Frame-Options" in headers
         }
+
 
         # ----------------------------
         # BASIC THREAT INTELLIGENCE
         # ----------------------------
         suspicious_keywords = [
-            "login", "verify", "bank", "secure",
-            "account", "update", "password"
+            "login",
+            "verify",
+            "bank",
+            "secure",
+            "account",
+            "update",
+            "password"
         ]
 
         threat_score = 0
@@ -42,13 +64,22 @@ def scan_website(url: str):
             if word in url_lower:
                 threat_score += 5
 
-        # HTTP (not HTTPS) increases risk
-        if url.startswith("http://") and not url.startswith("https://"):
+
+        # HTTP increases risk
+        if url.startswith("http://"):
             threat_score += 20
 
-        # Simple phishing signal: long numbers in URL
+
+        # Long numbers can indicate suspicious URLs
         if re.search(r"\d{4,}", url):
             threat_score += 10
+
+
+        # ----------------------------
+        # SSL CHECK
+        # ----------------------------
+        ssl_data = check_ssl(url)
+
 
         return {
             "website": url,
@@ -57,10 +88,13 @@ def scan_website(url: str):
             "status_code": response.status_code,
             "response_time": elapsed,
             "threat_score": threat_score,
-            "security_headers": security_headers
+            "security_headers": security_headers,
+            "ssl": ssl_data
         }
 
+
     except Exception:
+
         return {
             "website": url,
             "status": "Offline",
@@ -68,10 +102,19 @@ def scan_website(url: str):
             "status_code": None,
             "response_time": None,
             "threat_score": 100,
+
             "security_headers": {
-                "Strict-Transport-Security": False,
+                "Strict-Transport-HSTS": False,
                 "Content-Security-Policy": False,
                 "X-Content-Type-Options": False,
                 "X-Frame-Options": False
+            },
+
+            "ssl": {
+                "valid": False,
+                "issuer": None,
+                "expires": None,
+                "days_remaining": None,
+                "tls_version": None
             }
         }

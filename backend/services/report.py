@@ -36,6 +36,7 @@ def build_scan_data(result):
         "https": result["https"],
         "status_code": result["status_code"],
         "response_time": result.get("response_time"),
+        "ssl": result.get("ssl"),
 
         "headers": headers,
         "score": score,
