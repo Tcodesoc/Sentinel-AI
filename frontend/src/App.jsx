@@ -128,6 +128,13 @@ function App() {
               <li key={index}>{item}</li>
             ))}
           </ul>
+          <hr />
+
+<h3>🤖 AI Security Analysis</h3>
+
+<p>
+  {scan.explanations}
+</p>
         </div>
       )}
     </div>
