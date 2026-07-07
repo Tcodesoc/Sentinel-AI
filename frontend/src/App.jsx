@@ -134,7 +134,7 @@ function App() {
 <h3>🔐 SSL Certificate</h3>
 
 {scan.ssl?.valid ? (
-  <div>
+  <div className="card">
     <p>
       ✅ Certificate Valid
     </p>
@@ -156,9 +156,56 @@ function App() {
     </p>
   </div>
 ) : (
-  <p>
-    ❌ SSL certificate information unavailable
-  </p>
+  <div className="card">
+    <p>
+      ❌ SSL certificate information unavailable
+    </p>
+  </div>
+)}
+
+
+{/* Domain Intelligence */}
+{scan.domain && (
+  <div className="card">
+
+    <h3>🌍 Domain Intelligence</h3>
+
+    <p>
+      Registrar:{" "}
+      <strong>
+        {scan.domain.registrar || "Unknown"}
+      </strong>
+    </p>
+
+    <p>
+      Created:{" "}
+      <strong>
+        {scan.domain.created || "Unknown"}
+      </strong>
+    </p>
+
+    <p>
+      Domain Age:{" "}
+      <strong>
+        {scan.domain.domain_age
+          ? `${scan.domain.domain_age} years`
+          : "Unknown"}
+      </strong>
+    </p>
+
+    <p>
+      Nameservers:
+    </p>
+
+    <ul>
+      {(scan.domain.nameservers || []).map((ns, index) => (
+        <li key={index}>
+          {ns}
+        </li>
+      ))}
+    </ul>
+
+  </div>
 )}
 
 <h3>🤖 AI Security Analysis</h3>

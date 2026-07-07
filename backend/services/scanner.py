@@ -2,6 +2,7 @@ import time
 import requests
 import re
 from services.ssl_checker import check_ssl
+from services.domain_checker import check_domain
 
 
 def scan_website(url: str):
@@ -78,7 +79,33 @@ def scan_website(url: str):
         # ----------------------------
         # SSL CHECK
         # ----------------------------
-        ssl_data = check_ssl(url)
+        try:
+            ssl_data = check_ssl(url)
+
+        except Exception:
+            ssl_data = {
+                "valid": False,
+                "issuer": None,
+                "expires": None,
+                "days_remaining": None,
+                "tls_version": None
+            }
+
+
+        # ----------------------------
+        # DOMAIN CHECK
+        # ----------------------------
+        try:
+            domain_data = check_domain(url)
+
+        except Exception:
+            domain_data = {
+                "domain": url,
+                "registrar": None,
+                "created": None,
+                "domain_age": None,
+                "nameservers": []
+            }
 
 
         return {
@@ -89,7 +116,8 @@ def scan_website(url: str):
             "response_time": elapsed,
             "threat_score": threat_score,
             "security_headers": security_headers,
-            "ssl": ssl_data
+            "ssl": ssl_data,
+            "domain": domain_data
         }
 
 
@@ -104,7 +132,7 @@ def scan_website(url: str):
             "threat_score": 100,
 
             "security_headers": {
-                "Strict-Transport-HSTS": False,
+                "Strict-Transport-Security": False,
                 "Content-Security-Policy": False,
                 "X-Content-Type-Options": False,
                 "X-Frame-Options": False
@@ -116,5 +144,13 @@ def scan_website(url: str):
                 "expires": None,
                 "days_remaining": None,
                 "tls_version": None
+            },
+
+            "domain": {
+                "domain": None,
+                "registrar": None,
+                "created": None,
+                "domain_age": None,
+                "nameservers": []
             }
         }

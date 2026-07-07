@@ -3,7 +3,6 @@ from services.risk import calculate_risk
 from services.ai_explainer import explain_risk
 
 
-
 def build_scan_data(result):
 
     headers = result["security_headers"]
@@ -11,24 +10,43 @@ def build_scan_data(result):
     recommendations = []
 
     if not headers["Strict-Transport-Security"]:
-        recommendations.append("Enable Strict-Transport-Security to enforce HTTPS.")
+        recommendations.append(
+            "Enable Strict-Transport-Security to enforce HTTPS."
+        )
 
     if not headers["Content-Security-Policy"]:
-        recommendations.append("Add a Content-Security-Policy header to reduce XSS risk.")
+        recommendations.append(
+            "Add a Content-Security-Policy header to reduce XSS risk."
+        )
 
     if not headers["X-Content-Type-Options"]:
-        recommendations.append("Enable X-Content-Type-Options to prevent MIME sniffing.")
+        recommendations.append(
+            "Enable X-Content-Type-Options to prevent MIME sniffing."
+        )
 
     if not headers["X-Frame-Options"]:
-        recommendations.append("Enable X-Frame-Options to help prevent clickjacking.")
+        recommendations.append(
+            "Enable X-Frame-Options to help prevent clickjacking."
+        )
 
     if len(recommendations) == 0:
-        recommendations.append("Excellent! No missing security headers were detected.")
+        recommendations.append(
+            "Excellent! No missing security headers were detected."
+        )
 
-    score, risk = calculate_risk(headers, result.get("threat_score", 0))
 
-    passed = sum(1 for v in headers.values() if v)
+    score, risk = calculate_risk(
+        headers,
+        result.get("threat_score", 0)
+    )
+
+
+    passed = sum(
+        1 for v in headers.values() if v
+    )
+
     total = len(headers)
+
 
     return {
         "website": result["website"],
@@ -36,17 +54,26 @@ def build_scan_data(result):
         "https": result["https"],
         "status_code": result["status_code"],
         "response_time": result.get("response_time"),
-        "ssl": result.get("ssl"),
 
         "headers": headers,
+
         "score": score,
         "risk": risk,
 
         "recommendations": recommendations,
-        "scan_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+
+        "scan_time": datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
 
         "passed_headers": passed,
         "total_headers": total,
 
-        "explanations": explain_risk(result)
+        "explanations": explain_risk(result),
+
+        # SSL Intelligence
+        "ssl": result.get("ssl"),
+
+        # Domain Intelligence
+        "domain": result.get("domain")
     }
