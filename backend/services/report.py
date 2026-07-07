@@ -36,9 +36,12 @@ def build_scan_data(result):
 
 
     score, risk = calculate_risk(
-        headers,
-        result.get("threat_score", 0)
-    )
+    headers,
+    result.get("threat_score", 0),
+    result.get("ssl"),
+    result.get("domain"),
+    result.get("dns")
+)
 
 
     passed = sum(
