@@ -5,7 +5,7 @@ import re
 from services.ssl_checker import check_ssl
 from services.domain_checker import check_domain
 from services.dns_checker import check_dns
-
+from services.port_checker import check_ports
 
 def scan_website(url: str):
 
@@ -129,6 +129,19 @@ def scan_website(url: str):
                 "spf": False,
                 "dmarc": False
             }
+            
+            
+        # ----------------------------
+        # PORT CHECK
+        # ----------------------------
+        try:
+            port_data = check_ports(url)
+
+        except Exception:
+            port_data = {
+                "host": url,
+                "open_ports": []
+            }
 
 
 
@@ -146,10 +159,10 @@ def scan_website(url: str):
 
             "domain": domain_data,
 
-            "dns": dns_data
+            "dns": dns_data,
+
+            "ports": port_data
         }
-
-
 
     except Exception:
 

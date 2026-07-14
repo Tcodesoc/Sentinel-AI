@@ -34,22 +34,19 @@ def build_scan_data(result):
             "Excellent! No missing security headers were detected."
         )
 
-
     score, risk = calculate_risk(
-    headers,
-    result.get("threat_score", 0),
-    result.get("ssl"),
-    result.get("domain"),
-    result.get("dns")
-)
-
+        headers,
+        result.get("threat_score", 0),
+        result.get("ssl"),
+        result.get("domain"),
+        result.get("dns")
+    )
 
     passed = sum(
         1 for v in headers.values() if v
     )
 
     total = len(headers)
-
 
     return {
         "website": result["website"],
@@ -76,7 +73,9 @@ def build_scan_data(result):
 
         "ssl": result.get("ssl"),
 
-"domain": result.get("domain"),
+        "domain": result.get("domain"),
 
-"dns": result.get("dns")
+        "dns": result.get("dns"),
+
+        "ports": result.get("ports")
     }

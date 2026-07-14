@@ -271,12 +271,43 @@ function App() {
   </p>
 )}
 
+<hr />
+
+<h3>🛜 Port Intelligence</h3>
+
+{scan.ports && (
+  <div>
+    <p>
+      <strong>Host:</strong> {scan.ports.host}
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Port</th>
+          <th>Service</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {scan.ports.ports.map((port, index) => (
+          <tr key={index}>
+            <td>{port.port}</td>
+            <td>{port.service}</td>
+            <td>{port.open ? "🟢 Open" : "⚪ Closed"}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
 <h3>🤖 AI Security Analysis</h3>
 
-<p>
-  {scan.explanations}
-</p>
-        </div>
+<p>{scan.explanations}</p>
+
+    </div>
       )}
     </div>
   );
